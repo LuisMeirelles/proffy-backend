@@ -1,4 +1,4 @@
-import { Request, Response, response } from 'express'
+import { Request, Response } from 'express'
 
 import connection from '../database/connection'
 import hourToMinutes from '../utils/hourToMinutes'
@@ -18,7 +18,7 @@ export default class ClassesController {
 		const time = filters.time as string
 
 		if (!filters.week_day || !filters.subject || !filters.time) {
-			return response.status(400).json({
+			return res.status(400).json({
 				error: 'Missing filters to search classes'
 			})
 		}
@@ -85,6 +85,8 @@ export default class ClassesController {
 
 			return res.status(201).send()
 		} catch (err) {
+			console.warn(err)
+			
 			await trx.rollback()
 
 			return res.status(400).json({
