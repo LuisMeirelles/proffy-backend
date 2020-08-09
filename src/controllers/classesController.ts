@@ -4,7 +4,7 @@ import connection from '../database/connection'
 import hourToMinutes from '../utils/hourToMinutes'
 
 interface ScheduleItem {
-	week_day: number,
+	day: number,
 	from: string,
 	to: string
 }
@@ -14,10 +14,10 @@ export default class ClassesController {
 		const filters = req.query
 
 		const subject = filters.subject as string
-		const week_day = filters.week_day as string
+		const day = filters.day as string
 		const time = filters.time as string
 
-		if (!filters.week_day || !filters.subject || !filters.time) {
+		if (!filters.day || !filters.subject || !filters.time) {
 			return res.status(400).json({
 				error: 'Missing filters to search classes'
 			})
@@ -30,7 +30,7 @@ export default class ClassesController {
 				this.select('class_schedule.*')
 					.from('class_schedule')
 					.whereRaw('`class_schedule`.`class_id` = `classes`.`id`')
-					.whereRaw('`class_schedule`.`week_day`= ??', [Number(week_day)])
+					.whereRaw('`class_schedule`.`day`= ??', [Number(day)])
 					.whereRaw('`class_schedule`.`from` <= ??', [timeInMinutes])
 					.whereRaw('`class_schedule`.`to` > ??', [timeInMinutes])
 			})
@@ -74,7 +74,7 @@ export default class ClassesController {
 
 			const classSchedule = schedule.map((scheduleItem: ScheduleItem) => ({
 				class_id,
-				week_day: scheduleItem.week_day,
+				day: scheduleItem.day,
 				from: hourToMinutes(scheduleItem.from),
 				to: hourToMinutes(scheduleItem.to)
 			}))
@@ -86,7 +86,7 @@ export default class ClassesController {
 			return res.status(201).send()
 		} catch (err) {
 			console.warn(err)
-			
+
 			await trx.rollback()
 
 			return res.status(400).json({
